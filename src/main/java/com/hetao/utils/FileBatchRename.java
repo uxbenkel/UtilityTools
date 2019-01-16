@@ -14,15 +14,15 @@ public class FileBatchRename {
 
     //****************************自定义参数****************************
     // 自定义文件名前缀(可选,不需要请填"")
-    private static final String PREFIX    = "wallpaper_";
+    private static final String PREFIX    = "picture_";
     // 自定义文件名后缀(可选,不需要请填"")
     private static final String SUFFIX    = "";
     // 过滤文件扩展名(可选,修改需要加点,示例如下,不需要修改请设置为null)
-    private static final String extension = ".jpg";
+    private static final String extension = null;
     // 重命名类型，默认为ORDER
-    private static FileRenameType TYPE    = FileRenameType.ORDER;
+    private static FileRenameType TYPE    = FileRenameType.UUID;
     // 要批量重命名的文件所在文件夹路径
-    private static final String FILEPATH  = "/Users/hetao/Downloads/123";
+    private static final String FILEPATH  = "/Users/hetao/Pictures/未分类";
     //****************************自定义参数****************************
 
     // 重命名总数量统计
@@ -43,7 +43,7 @@ public class FileBatchRename {
     public static void rename(File file) {
         if (!file.isDirectory()) {
             String[] name = file.getName().split("\\.");
-            String EXTENSION = "." + name[name.length - 1];
+            String EXTENSION = "." + name[name.length - 1].toLowerCase();
             if (extension != null) {
                 EXTENSION = extension;
             }
