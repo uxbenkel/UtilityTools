@@ -14,7 +14,7 @@ public class FileBatchRename {
 
     //****************************自定义参数****************************
     // 自定义文件名前缀(可选,不需要请填"")
-    private static final String PREFIX    = "picture_";
+    private static final String PREFIX    = "";
     // 自定义文件名后缀(可选,不需要请填"")
     private static final String SUFFIX    = "";
     // 过滤文件扩展名(可选,修改需要加点,示例如下,不需要修改请设置为null)
@@ -22,7 +22,7 @@ public class FileBatchRename {
     // 重命名类型，默认为ORDER
     private static FileRenameType TYPE    = FileRenameType.UUID;
     // 要批量重命名的文件所在文件夹路径
-    private static final String FILEPATH  = "/Users/hetao/Pictures/未分类";
+    private static final String FILEPATH  = "/Users/hetao/Downloads/Inbox";
     //****************************自定义参数****************************
 
     // 重命名总数量统计
