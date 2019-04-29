@@ -1,6 +1,8 @@
 package com.hetao.tools;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
 /**
  * @author hetao
@@ -24,17 +26,20 @@ public class CorrespondAuthor {
         String[] author_affiliations = text.split("Author Affiliations\n");
         // 一共有多少篇文章
         System.out.println(author_affiliations.length);
-        int count = 1;
+        int articleCount = 1;
 
         // 循环查找每一篇文章的作者地址和邮箱
         for (String author_affiliation : author_affiliations) {
-            System.out.println("第" + count + "个：");
+            System.out.println("第" + articleCount + "篇：");
             if (author_affiliation.contains("*Corresponding author")) {
                 // 一、包含*Corresponding author的情况
                 String[] lines = author_affiliation.split("\\*Corresponding author: ");
+                // 1、以下是邮箱部分(仅有1个)
+                String keyMail = lines[1].replace("\n", "");
+                System.out.println(keyMail);
+                // 2、以下是作者部分(仅有1个)
                 String authorsAndAddress = lines[0];
                 int startIndex = authorsAndAddress.indexOf("\n");
-                // 1、以下是作者部分(仅有1个)
                 String authors = authorsAndAddress.substring(0, startIndex);
                 String keyAuthor = " ";
                 ArrayList<String> keyAddressNums = new ArrayList<>();
@@ -73,10 +78,6 @@ public class CorrespondAuthor {
                 }
                 System.out.println(keyAuthor);
 
-                // 2、以下是邮箱部分(仅有1个)
-                String keyMail = lines[1].replace("\n", "");
-                System.out.println(keyMail);
-
                 // 3、以下是通讯地址部分(可能多个)
                 String addresss = authorsAndAddress.substring(startIndex);
                 String keyAddress;
@@ -95,28 +96,61 @@ public class CorrespondAuthor {
             } else {
                 // 二、不含*Corresponding author的情况
                 int startIndex = author_affiliation.indexOf("\n");
-                // 1、以下是作者部分(必有多个)
+                // 1、首先找到邮箱及邮箱编号(必有多个)
+                String mailsAndAddresses = author_affiliation.substring(startIndex);
+                String[] splits = mailsAndAddresses.replaceFirst("\n1", "").split("\n\\d+");
+                HashMap<Integer, String> mailMap = new HashMap<>();
+                HashMap<Integer, String> addressMap = new HashMap<>();
+                int count = 1;
+                for (String split : splits) {
+                    if (split.contains("@")) {
+                        mailMap.put(count, split);
+                    } else {
+                        addressMap.put(count, split);
+                    }
+                    count++;
+                }
+
+                // 2、然后通过邮箱编号找到作者(必有多个),最后通过作者找到地址编号(可能多个)
                 String authors = author_affiliation.substring(0, startIndex);
-                String keyAuthor = " ";
                 // ArrayList<String> keyAddressNums = new ArrayList<>();
                 ArrayList<String> authorArray = new ArrayList<>();
+                ArrayList<String> keyAuthors = new ArrayList<>();
                 String[] split1 = authors.split("and ");
-                for (String s : split1) {
-                }
-                // 2、以下是邮箱和通讯地址部分(必有多个)
-                String mailsAndAddresses = author_affiliation.substring(startIndex);
-                String[] splits = mailsAndAddresses.replace("\n1", "").split("\n\\d");
-                String keyMail;
-                String keyAddress;
-                for (String split : splits) {
-                    if (split.contains("@")){
-                        // 是邮箱
-                    }else{
-                        // 是地址
+                for (String split11 : split1) {
+                    String[] split2 = split11.split(",\\d ");
+                    for (String split22 : split2) {
+                        int index = split11.indexOf(split22);
+                        if (split22.length() + index + 2 < split11.length()) {
+                            authorArray.add(split22 + split11.substring(split22.length() + index, split22.length() + index + 2));
+                        } else {
+                            authorArray.add(split22);
+                        }
                     }
                 }
+                for (String author : authorArray) {
+                    Set<Integer> mailNums = mailMap.keySet();
+                    Set<Integer> addressNums = addressMap.keySet();
+                    for (Integer mailNum : mailNums) {
+                        System.out.println(mailMap.get(mailNum));
+                        if (author.contains(mailNum + "")) {
+                            keyAuthors.add(author);
+                            System.out.println(author);
+                            String nums = author.replaceAll("[^0-9]", "").replace(mailNum + "", "");
+                            char[] chars = nums.toCharArray();
+                            for (char aChar : chars) {
+                                for (Integer addressNum : addressNums) {
+                                    if (Integer.parseInt(aChar + "") == addressNum) {
+                                        System.out.println(addressMap.get(addressNum));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
-            count++;
+            articleCount++;
         }
 
     }
