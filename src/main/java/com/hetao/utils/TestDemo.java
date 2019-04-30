@@ -5,7 +5,7 @@ package com.hetao.utils;
  */
 public class TestDemo {
     public static void main(String[] args) {
-        String s = "Yan Zhang1,4";
-        System.out.println(s.replaceAll("[^0-9]", ""));
+        String s = "Yan Zhang1,41,a1,b";
+        System.out.println(s.replaceAll("[^0-9,]", ""));
     }
 }

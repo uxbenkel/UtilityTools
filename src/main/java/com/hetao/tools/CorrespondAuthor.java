@@ -115,43 +115,40 @@ public class CorrespondAuthor {
                 String authors = author_affiliation.substring(0, startIndex);
                 // ArrayList<String> keyAddressNums = new ArrayList<>();
                 ArrayList<String> authorArray = new ArrayList<>();
-                ArrayList<String> keyAuthors = new ArrayList<>();
                 String[] split1 = authors.split("and ");
                 for (String split11 : split1) {
-                    String[] split2 = split11.split(",\\d ");
+                    String[] split2 = split11.split(",\\d+ ");
                     for (String split22 : split2) {
                         int index = split11.indexOf(split22);
                         if (split22.length() + index + 2 < split11.length()) {
-                            authorArray.add(split22 + split11.substring(split22.length() + index, split22.length() + index + 2));
+                            authorArray.add(split22 + split11.substring(split22.length() + index, split22.length() + index + 3));
                         } else {
                             authorArray.add(split22);
                         }
                     }
                 }
-                for (String author : authorArray) {
-                    Set<Integer> mailNums = mailMap.keySet();
-                    Set<Integer> addressNums = addressMap.keySet();
-                    for (Integer mailNum : mailNums) {
-                        System.out.println(mailMap.get(mailNum));
+                Set<Integer> mailNums = mailMap.keySet();
+                Set<Integer> addressNums = addressMap.keySet();
+                for (Integer mailNum : mailNums) {
+                    for (String author : authorArray) {
                         if (author.contains(mailNum + "")) {
-                            keyAuthors.add(author);
-                            System.out.println(author);
-                            String nums = author.replaceAll("[^0-9]", "").replace(mailNum + "", "");
-                            char[] chars = nums.toCharArray();
-                            for (char aChar : chars) {
+                            System.out.println(mailMap.get(mailNum).replace("\n", ""));
+                            System.out.println(author.replaceAll("\\d|,| ", ""));
+                            String nums = author.replaceAll("[^0-9,]", "").replace(mailNum + "", "");
+                            String[] numArray = nums.replaceFirst(",", "").split(",");
+                            for (String num : numArray) {
                                 for (Integer addressNum : addressNums) {
-                                    if (Integer.parseInt(aChar + "") == addressNum) {
-                                        System.out.println(addressMap.get(addressNum));
+                                    if (Integer.parseInt(num + "") == addressNum) {
+                                        System.out.println(addressMap.get(addressNum).replace("\n", ""));
                                     }
                                 }
                             }
                         }
                     }
+                    System.out.println();
                 }
-
             }
             articleCount++;
         }
-
     }
 }
