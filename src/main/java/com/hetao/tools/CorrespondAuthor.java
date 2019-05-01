@@ -1,5 +1,9 @@
 package com.hetao.tools;
 
+import org.apache.poi.POIXMLDocument;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -9,20 +13,10 @@ import java.util.Set;
  * @date 2019-04-27
  */
 public class CorrespondAuthor {
-    public static void main(String[] args) {
-        String text = " Huibin Chang,1,2,10 Pablo Enfedaque,2 Jie Zhang,1 Juliane Reinhardt,3,4 Bjoern Enders,5,6 Young-Sang Yu,5 David Shapiro,5 Christian G. Schroer,7,8 Tieyong Zeng,9 and Stefano Marchesini2,11 \n" +
-                "1School of Mathematical Sciences, Tianjin Normal University, Tianjin, China\n" +
-                "2Computational Research Division, Lawrence Berkeley National Laboratory, Berkeley, CA, \n" +
-                "USA\n" +
-                "3ARC Centre of Excellence for Advanced Molecular Imaging, Department of Chemistry and Physics, La Trobe Institute for Molecular Sciences, La Trobe University, Bundoora, Australia\n" +
-                "4The Australian Synchrotron, Clayton, Australia\n" +
-                "5Advanced Light Source, Lawrence Berkeley National Laboratory, Berkeley, CA, USA\n" +
-                "6Physics Department, University of California at Berkeley, Berkeley, CA, USA\n" +
-                "7Deutsches Elektronen-Synchrotron DESY, D-22607 Hamburg, Germany\n" +
-                "8Department Physik, Universität Hamburg, Luruper Chaussee 149, 22761 Hamburg, Germany\n" +
-                "9Department of Mathematics, The Chinese University of Hong Kong, Hong Kong\n" +
-                "10changhuibin@gmail.com\n" +
-                "11smarchesini@lbl.gov\n";
+    public static void main(String[] args) throws Exception {
+        OPCPackage opcPackage = POIXMLDocument.openPackage("/Users/hetao/Downloads/Inbox/correspond8.docx");
+        String text = new XWPFWordExtractor(opcPackage).getText().replaceAll("\n\n+", "\n").trim();
+        System.out.println(text);
         String[] author_affiliations = text.split("Author Affiliations\n");
         // 一共有多少篇文章
         System.out.println(author_affiliations.length);
@@ -30,9 +24,12 @@ public class CorrespondAuthor {
 
         // 循环查找每一篇文章的作者地址和邮箱
         for (String author_affiliation : author_affiliations) {
+            if ("".equals(author_affiliation)) {
+                continue;
+            }
             System.out.println("第" + articleCount + "篇：");
-            if (author_affiliation.contains("*Corresponding author")) {
-                // 一、包含*Corresponding author的情况
+            if (author_affiliation.contains("Corresponding author")) {
+                // 一、包含Corresponding author的情况
                 String[] lines = author_affiliation.split("\\*Corresponding author: ");
                 // 1、以下是邮箱部分(仅有1个)
                 String keyMail = lines[1].replace("\n", "");
@@ -57,8 +54,15 @@ public class CorrespondAuthor {
                         correspondAuthor = correspondAuthors.split(",");
                         int i = 1;
                         while (keyAuthor.matches(" |\\d")) {
-                            keyAddressNums.add(keyAuthor);
-                            keyAuthor = correspondAuthor[correspondAuthor.length - i].replaceAll("\\d", "");
+                            if (keyAuthor.matches("\\d")) {
+                                if (!keyAddressNums.contains(keyAuthor)) {
+                                    keyAddressNums.add(keyAuthor);
+                                }
+                            }
+                            keyAuthor = "".equals(correspondAuthor[correspondAuthor.length - i]) ? correspondAuthor[correspondAuthor.length - ++i] : correspondAuthor[correspondAuthor.length - i];
+                            if (keyAuthor.replace(" ", "").matches("\\S*\\d")) {
+                                keyAddressNums.add(keyAuthor.substring(keyAuthor.length() - 1));
+                            }
                             i++;
                         }
                     }
@@ -67,16 +71,18 @@ public class CorrespondAuthor {
                     int i = 1;
                     while (keyAuthor.matches(" |\\d")) {
                         if (keyAuthor.matches("\\d")) {
-                            keyAddressNums.add(keyAuthor);
+                            if (!keyAddressNums.contains(keyAuthor)) {
+                                keyAddressNums.add(keyAuthor);
+                            }
                         }
-                        keyAuthor = correspondAuthor[correspondAuthor.length - i].replaceAll("\\d", "");
-                        if (keyAuthor.replace(" ", "").matches("\\S+\\d")) {
+                        keyAuthor = "".equals(correspondAuthor[correspondAuthor.length - i]) ? correspondAuthor[correspondAuthor.length - ++i] : correspondAuthor[correspondAuthor.length - i];
+                        if (keyAuthor.replace(" ", "").matches("\\S*\\d")) {
                             keyAddressNums.add(keyAuthor.substring(keyAuthor.length() - 1));
                         }
                         i++;
                     }
                 }
-                System.out.println(keyAuthor);
+                System.out.println(keyAuthor.replaceAll("\\d", "").trim());
 
                 // 3、以下是通讯地址部分(可能多个)
                 String addresss = authorsAndAddress.substring(startIndex);
@@ -92,9 +98,9 @@ public class CorrespondAuthor {
                         System.out.println(keyAddress);
                     }
                 }
-
+                System.out.println();
             } else {
-                // 二、不含*Corresponding author的情况
+                // 二、不含Corresponding author的情况
                 int startIndex = author_affiliation.indexOf("\n");
                 // 1、首先找到邮箱及邮箱编号(必有多个)
                 String mailsAndAddresses = author_affiliation.substring(startIndex);
@@ -133,7 +139,7 @@ public class CorrespondAuthor {
                     for (String author : authorArray) {
                         if (author.contains(mailNum + "")) {
                             System.out.println(mailMap.get(mailNum).replace("\n", ""));
-                            System.out.println(author.replaceAll("\\d|,| ", ""));
+                            System.out.println(author.replaceAll("\\d|,", "").trim());
                             String nums = author.replaceAll("[^0-9,]", "").replace(mailNum + "", "");
                             String[] numArray = nums.replaceFirst(",", "").split(",");
                             for (String num : numArray) {
