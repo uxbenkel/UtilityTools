@@ -97,29 +97,27 @@ public class CorrespondAuthor {
                 // 2、以下是作者部分(仅有1个)
                 String authorsAndAddress = lines[0];
                 int startIndex = authorsAndAddress.indexOf("\n");
-                String authors = authorsAndAddress.substring(0, startIndex);
                 String keyAuthor = " ";
                 HashSet<String> keyAddressNums = new HashSet<>();
-                String[] authorArray = authors.split("\\*");
-                String correspondAuthors = authorArray[0];
-                if (correspondAuthors.contains("and")) {
-                    String[] correspondAuthor = correspondAuthors.split("and ");
-                    int length = correspondAuthor.length;
-                    String lastCorrespondAuthor = correspondAuthor[length - 1];
-                    if (lastCorrespondAuthor.split(",").length == 1) {
-                        keyAuthor = lastCorrespondAuthor.replace(",", "");
+                String authors_ = authorsAndAddress.substring(0, startIndex).split("\\*")[0];
+                if (authors_.contains("and")) {
+                    String[] authors = authors_.split("and ");
+                    int length = authors.length;
+                    String lastAuthor = authors[length - 1];
+                    if (lastAuthor.split(",").length == 1) {
+                        keyAuthor = lastAuthor.replace(",", "");
                         if (keyAuthor.replace(" ", "").matches("\\S*\\d")) {
                             keyAddressNums.add(keyAuthor.substring(keyAuthor.length() - 1) + "");
                         }
                     } else {
-                        correspondAuthor = correspondAuthors.split(",");
-                        length = correspondAuthor.length;
+                        authors = authors_.split(",");
+                        length = authors.length;
                         int i = 1;
                         while (keyAuthor.matches(" |\\d")) {
                             if (keyAuthor.matches("\\d")) {
                                 keyAddressNums.add(keyAuthor);
                             }
-                            keyAuthor = "".equals(correspondAuthor[length - i]) ? correspondAuthor[length - ++i] : correspondAuthor[length - i];
+                            keyAuthor = "".equals(authors[length - i]) ? authors[length - ++i] : authors[length - i];
                             if (keyAuthor.replace(" ", "").matches("\\S*\\d")) {
                                 keyAddressNums.add(keyAuthor.substring(keyAuthor.length() - 1));
                             }
@@ -127,14 +125,14 @@ public class CorrespondAuthor {
                         }
                     }
                 } else {
-                    String[] correspondAuthor = correspondAuthors.split(",");
+                    String[] authors = authors_.split(",");
                     int i = 1;
-                    int length = correspondAuthor.length;
+                    int length = authors.length;
                     while (keyAuthor.matches(" |\\d")) {
                         if (keyAuthor.matches("\\d")) {
                             keyAddressNums.add(keyAuthor);
                         }
-                        keyAuthor = "".equals(correspondAuthor[length - i]) ? correspondAuthor[length - ++i] : correspondAuthor[length - i];
+                        keyAuthor = "".equals(authors[length - i]) ? authors[length - ++i] : authors[length - i];
                         if (keyAuthor.replace(" ", "").matches("\\S*\\d")) {
                             keyAddressNums.add(keyAuthor.substring(keyAuthor.length() - 1));
                         }
@@ -158,7 +156,7 @@ public class CorrespondAuthor {
                     String[] keyAddresses = addresss.replace("\n1", "").split("\n\\d");
                     for (String keyAddressNum : keyAddressNums) {
                         keyAddress = keyAddresses[Integer.parseInt(keyAddressNum) - 1].trim();
-                        if ("These authors contributed equally to this work".equals(keyAddress)) {
+                        if ("These authors_ contributed equally to this work".equals(keyAddress)) {
                             continue;
                         }
                         if (!"".contentEquals(printAddress)) {
