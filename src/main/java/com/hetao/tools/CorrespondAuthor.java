@@ -1,13 +1,11 @@
 package com.hetao.tools;
 
-import org.apache.poi.POIXMLDocument;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,23 +17,60 @@ import java.util.Set;
  */
 public class CorrespondAuthor {
     public static void main(String[] args) throws Exception {
+
         // 读取word内容，提取文本
         String inputPath = "/Users/hetao/Downloads/Inbox/correspond8.docx";
+        FileInputStream is = new FileInputStream(inputPath);
         String outputPath = inputPath.substring(0, inputPath.lastIndexOf("/") + 1) + "result.xlsx";
-        OPCPackage opcPackage = POIXMLDocument.openPackage(inputPath);
-        String text = new XWPFWordExtractor(opcPackage).getText().replaceAll("\n\n+", "\n").trim();
-        // 创建Excel对象，等待写入数据
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet(inputPath.substring(inputPath.lastIndexOf("/") + 1, inputPath.lastIndexOf(".")));
         FileOutputStream fos = new FileOutputStream(outputPath);
-        System.out.println("开始写入文件>>>>>>>>>>>>");
+        String text = new XWPFWordExtractor(new XWPFDocument(is)).getText().replaceAll("\n\n+", "\n").trim();
+        // 创建Excel对象，等待写入数据
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet(inputPath.substring(inputPath.lastIndexOf("/") + 1, inputPath.lastIndexOf(".")));
+        XSSFCellStyle titleStyle = workbook.createCellStyle();
+        XSSFCellStyle cellStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        // 设置Excel格式
+        font.setFontName("微软雅黑");
+        font.setFontHeightInPoints((short) 11);
+        titleStyle.setFont(font);
+        titleStyle.setFillForegroundColor(IndexedColors.YELLOW.index);
+        titleStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_LEFT);
+        titleStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+        titleStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+        titleStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+        titleStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+        cellStyle.setFont(font);
+        cellStyle.setAlignment(XSSFCellStyle.ALIGN_LEFT);
+        cellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+        cellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+        cellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+        cellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+        cellStyle.setWrapText(true);
+        sheet.setColumnWidth(0, 5 * 256);
+        sheet.setColumnWidth(1, 40 * 256);
+        sheet.setColumnWidth(2, 40 * 256);
+        sheet.setColumnWidth(3, 255 * 256);
+        sheet.setZoom(3, 2);
+        System.out.println("开始写入文件......");
+        System.out.println("写入中......");
+
         // 写入表头数据
         int rowIndex = 0;
         Row titleRow = sheet.createRow(rowIndex);
-        titleRow.createCell(0).setCellValue("No.");
-        titleRow.createCell(1).setCellValue("corresponding author");
-        titleRow.createCell(2).setCellValue("email");
-        titleRow.createCell(3).setCellValue("affiliation");
+        Cell cellT0 = titleRow.createCell(0);
+        cellT0.setCellValue("No.");
+        cellT0.setCellStyle(titleStyle);
+        Cell cellT1 = titleRow.createCell(1);
+        cellT1.setCellValue("corresponding author");
+        cellT1.setCellStyle(titleStyle);
+        Cell cellT2 = titleRow.createCell(2);
+        cellT2.setCellValue("email");
+        cellT2.setCellStyle(titleStyle);
+        Cell cellT3 = titleRow.createCell(3);
+        cellT3.setCellValue("affiliation");
+        cellT3.setCellStyle(titleStyle);
         rowIndex++;
         String[] author_affiliations = text.split("Author Affiliations\n");
         // 一共有多少篇文章
@@ -50,13 +85,17 @@ public class CorrespondAuthor {
             // System.out.println("第" + articleCount + "篇：");
             if (author_affiliation.contains("*Corresponding author")) {
                 Row row = sheet.createRow(rowIndex);
-                row.createCell(0).setCellValue(rowIndex - 1);
+                Cell cellC0 = row.createCell(0);
+                cellC0.setCellValue(rowIndex);
+                cellC0.setCellStyle(cellStyle);
                 // 一、包含*Corresponding author的情况
                 String[] lines = author_affiliation.split("\\*Corresponding author: ");
                 // 1、以下是邮箱部分(仅有1个)
                 String keyMail = lines[1].replace("\n", "");
                 // System.out.println(keyMail);
-                row.createCell(2).setCellValue(keyMail);
+                Cell cellC2 = row.createCell(2);
+                cellC2.setCellValue(keyMail);
+                cellC2.setCellStyle(cellStyle);
                 // 2、以下是作者部分(仅有1个)
                 String authorsAndAddress = lines[0];
                 int startIndex = authorsAndAddress.indexOf("\n");
@@ -106,7 +145,9 @@ public class CorrespondAuthor {
                     }
                 }
                 // System.out.println(keyAuthor.replaceAll("\\d", "").trim());
-                row.createCell(1).setCellValue(keyAuthor.replaceAll("\\d", "").trim());
+                Cell cellC1 = row.createCell(1);
+                cellC1.setCellValue(keyAuthor.replaceAll("\\d", "").trim());
+                cellC1.setCellStyle(cellStyle);
 
                 // 3、以下是通讯地址部分(可能多个)
                 String addresss = authorsAndAddress.substring(startIndex);
@@ -114,16 +155,20 @@ public class CorrespondAuthor {
                 if (!addresss.startsWith("\n1")) {
                     keyAddress = addresss.replace("\n", "");
                     // System.out.println(keyAddress);
-                    row.createCell(3).setCellValue(keyAddress);
+                    Cell cellC3 = row.createCell(3);
+                    cellC3.setCellValue(keyAddress);
+                    cellC3.setCellStyle(cellStyle);
                 } else {
                     String[] keyAddresses = addresss.replace("\n1", "").split("\n\\d");
                     assert false;
                     for (String keyAddressNum : keyAddressNums) {
-                        keyAddress = keyAddresses[Integer.parseInt(keyAddressNum) - 1];
+                        keyAddress = keyAddresses[Integer.parseInt(keyAddressNum) - 1].trim();
                         keyAddress += keyAddress;
                         // System.out.println(keyAddress);
                     }
-                    row.createCell(3).setCellValue(keyAddress);
+                    Cell cellC3 = row.createCell(3);
+                    cellC3.setCellValue(keyAddress);
+                    cellC3.setCellStyle(cellStyle);
                 }
                 rowIndex++;
                 // System.out.println();
@@ -168,22 +213,30 @@ public class CorrespondAuthor {
                     Row row = sheet.createRow(rowIndex);
                     for (String author : authorArray) {
                         if (author.contains(mailNum + "")) {
-                            row.createCell(0).setCellValue(rowIndex - 1);
+                            Cell cellC0 = row.createCell(0);
+                            cellC0.setCellValue(rowIndex);
+                            cellC0.setCellStyle(cellStyle);
                             // System.out.println(mailMap.get(mailNum).replace("\n", ""));
-                            row.createCell(2).setCellValue(mailMap.get(mailNum).replace("\n", ""));
+                            Cell cellC2 = row.createCell(2);
+                            cellC2.setCellValue(mailMap.get(mailNum).replace("\n", ""));
+                            cellC2.setCellStyle(cellStyle);
                             // System.out.println(author.replaceAll("\\d|,", "").trim());
-                            row.createCell(1).setCellValue(author.replaceAll("\\d|,", "").trim());
+                            Cell cellC1 = row.createCell(1);
+                            cellC1.setCellValue(author.replaceAll("\\d|,", "").trim());
+                            cellC1.setCellStyle(cellStyle);
                             String nums = author.replaceAll("[^0-9,]", "").replace(mailNum + "", "");
                             String[] numArray = nums.replaceFirst(",", "").split(",");
                             for (String num : numArray) {
                                 for (Integer addressNum : addressNums) {
                                     if (Integer.parseInt(num + "") == addressNum) {
                                         // System.out.println(addressMap.get(addressNum));
-                                        keyAddress += addressMap.get(addressNum);
+                                        keyAddress += addressMap.get(addressNum).trim();
                                     }
                                 }
                             }
-                            row.createCell(3).setCellValue(keyAddress);
+                            Cell cellC3 = row.createCell(3);
+                            cellC3.setCellValue(keyAddress);
+                            cellC3.setCellStyle(cellStyle);
                         }
                     }
                     // System.out.println();
@@ -192,10 +245,10 @@ public class CorrespondAuthor {
             }
             // articleCount++;
         }
-        System.out.println("主表数据写入完成>>>>>>>>");
+
         workbook.write(fos);
         fos.flush();
         fos.close();
-        System.out.println(outputPath + "写入文件成功>>>>>>>>>>>");
+        System.out.println("写入文件成功!");
     }
 }
