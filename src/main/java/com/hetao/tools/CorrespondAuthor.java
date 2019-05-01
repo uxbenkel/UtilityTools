@@ -21,7 +21,7 @@ public class CorrespondAuthor {
         // 读取word内容，提取文本
         String inputPath = "/Users/hetao/Downloads/Inbox/correspond8.docx";
         FileInputStream is = new FileInputStream(inputPath);
-        String outputPath = inputPath.substring(0, inputPath.lastIndexOf("/") + 1) + "result.xlsx";
+        String outputPath = inputPath.replace("docx", "xlsx");
         FileOutputStream fos = new FileOutputStream(outputPath);
         String text = new XWPFWordExtractor(new XWPFDocument(is)).getText().replaceAll("\n\n+", "\n").replaceAll(",\\s*\n", ",").trim();
         // 创建Excel对象，等待写入数据
