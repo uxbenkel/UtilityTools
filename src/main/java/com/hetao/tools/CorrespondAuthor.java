@@ -19,7 +19,7 @@ public class CorrespondAuthor {
     public static void main(String[] args) throws Exception {
 
         // 读取word内容，提取文本
-        String inputPath = "/Users/hetao/Downloads/Inbox/correspond8.docx";
+        String inputPath = "/Users/hetao/Downloads/Inbox/correspond9.docx";
         FileInputStream is = new FileInputStream(inputPath);
         String outputPath = inputPath.replace("docx", "xlsx");
         FileOutputStream fos = new FileOutputStream(outputPath);
@@ -92,7 +92,7 @@ public class CorrespondAuthor {
                 // 1、以下是邮箱部分(仅有1个)
                 String keyMail = lines[1].replace("\n", "");
                 Cell cellC2 = row.createCell(2);
-                cellC2.setCellValue(keyMail);
+                cellC2.setCellValue(keyMail.trim());
                 cellC2.setCellStyle(cellStyle);
                 // 2、以下是作者部分(仅有1个)
                 String authorsAndAddress = lines[0];
@@ -150,11 +150,14 @@ public class CorrespondAuthor {
                 if (!addresss.startsWith("\n1")) {
                     keyAddress = addresss.replace("\n", "");
                     Cell cellC3 = row.createCell(3);
-                    cellC3.setCellValue(keyAddress);
+                    cellC3.setCellValue(keyAddress.trim());
                     cellC3.setCellStyle(cellStyle);
                 } else {
                     String[] keyAddresses = addresss.replace("\n1", "").split("\n\\d");
                     for (String keyAddressNum : keyAddressNums) {
+                        if ("".equals(keyAddressNum.replace(" ", ""))) {
+                            continue;
+                        }
                         keyAddress = keyAddresses[Integer.parseInt(keyAddressNum) - 1].trim();
                         if ("These authors_ contributed equally to this work".equals(keyAddress)) {
                             continue;
@@ -165,7 +168,7 @@ public class CorrespondAuthor {
                         printAddress.append(keyAddress);
                     }
                     Cell cellC3 = row.createCell(3);
-                    cellC3.setCellValue(printAddress.toString());
+                    cellC3.setCellValue(printAddress.toString().trim());
                     cellC3.setCellStyle(cellStyle);
                 }
                 rowIndex++;
@@ -217,7 +220,7 @@ public class CorrespondAuthor {
                             cellC0.setCellValue(rowIndex);
                             cellC0.setCellStyle(cellStyle);
                             Cell cellC2 = row.createCell(2);
-                            cellC2.setCellValue(mailMap.get(mailNum).replace("\n", ""));
+                            cellC2.setCellValue(mailMap.get(mailNum).replace("\n", "").trim());
                             cellC2.setCellStyle(cellStyle);
                             Cell cellC1 = row.createCell(1);
                             cellC1.setCellValue(author.replaceAll("\\d|,", "").trim());
@@ -226,6 +229,9 @@ public class CorrespondAuthor {
                             String[] authorNums = authorNumber.replaceFirst(",", "").split(",");
                             for (String authorNum : authorNums) {
                                 for (Integer addressNum : addressNums) {
+                                    if ("".equals(authorNum.replace(" ", ""))) {
+                                        continue;
+                                    }
                                     if (Integer.parseInt(authorNum + "") == addressNum) {
                                         if (!printAddress.toString().contains(addressMap.get(addressNum).trim())) {
                                             if (!"".equals(printAddress.toString())) {
@@ -237,7 +243,7 @@ public class CorrespondAuthor {
                                 }
                             }
                             Cell cellC3 = row.createCell(3);
-                            cellC3.setCellValue(printAddress.toString());
+                            cellC3.setCellValue(printAddress.toString().trim());
                             cellC3.setCellStyle(cellStyle);
                         }
                     }
