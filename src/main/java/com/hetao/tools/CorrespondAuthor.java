@@ -31,7 +31,7 @@ public class CorrespondAuthor {
         XSSFCellStyle cellStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         // 设置Excel格式
-        font.setFontName("微软雅黑");
+        font.setFontName("Calibri");
         font.setFontHeightInPoints((short) 11);
         titleStyle.setFont(font);
         titleStyle.setFillForegroundColor(IndexedColors.YELLOW.index);
