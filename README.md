@@ -37,6 +37,6 @@ Maven 仓库清理工具，清理 Maven 仓库中的以下内容
      2.  从任意进制转换为10进制(N=10)
      3.  将任意进制转换为任意进制（此时十进值的中间变量设为z）
 
-###Java Interface
+### Java Interface
 
 ![mainInterface](pic/mainInterface.png)
